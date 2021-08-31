@@ -1,0 +1,22 @@
+#!/bin/bash
+
+url=https://github.com/kmmiles/provision-bullseye
+dir="$HOME"/.local/src/provision-bullseye
+
+set -e
+
+if ! command -v "git" &> /dev/null; then
+  sudo apt update
+  sudo apt --no-install-recommends install -y git
+fi
+
+if [[ ! -d "$dir" ]]; then
+  mkdir -p "$(dirname "$dir")"
+  git clone "$url" "$dir"
+else
+  cd "$dir"
+  git pull
+fi
+
+cd "$dir"
+./bin/provision

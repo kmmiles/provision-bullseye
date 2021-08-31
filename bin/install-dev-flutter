@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+lb="$HOME"/.local/bin
+if ! chkpath flutter; then
+  log_msg "Installing flutter"
+  sudo apt --no-install-recommends -y install \
+    build-essential \
+    bash \
+    curl \
+    git \
+    zip \
+    unzip \
+    xz-utils \
+    libglu1-mesa
+
+  flutter_dir="$("$lb"/ghclone -s -b stable flutter/flutter)"
+  "$flutter_dir"/bin/flutter precache
+fi

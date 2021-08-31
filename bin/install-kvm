@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+# we always want these tools
+if ! chkpath qemu-system-x86_64 qemu-img kvm-ok; then
+  sudo apt --no-install-recommends -y install \
+    cpu-checker \
+    qemu-kvm \
+    qemu-utils
+fi

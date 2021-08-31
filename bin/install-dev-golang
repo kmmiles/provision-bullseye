@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+golang_url="https://golang.org/dl/go1.16.3.linux-amd64.tar.gz"
+if [[ ! -d "$HOME"/.local/go ]]; then
+  tar xmzf "$(dl $golang_url)" -C "$HOME"/.local
+fi
+

@@ -1,0 +1,145 @@
+#!/bin/bash
+################################################################################
+# Installs various tools in $HOME
+################################################################################
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+dotfiles_url="https://github.com/kmmiles/dotfiles"
+
+pp_url="https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping"
+exa_url="https://github.com/ogham/exa/releases/download/v0.9.0/exa-linux-x86_64-0.9.0.zip"
+glow_url="https://github.com/charmbracelet/glow/releases/download/v1.0.2/glow_1.0.2_linux_x86_64.tar.gz"
+ale_url="https://github.com/dense-analysis/ale.git"
+yt_url="https://yt-dl.org/downloads/latest/youtube-dl"
+yq_url="https://github.com/mikefarah/yq/releases/download/v4.6.1/yq_linux_amd64.tar.gz"
+fnm_url="https://github.com/Schniz/fnm/releases/download/v1.23.0/fnm-linux.zip"
+
+local_dir="$HOME/.local"
+lib_dir="$local_dir/lib"
+bin_dir="$local_dir/bin"
+vim_dir="$HOME/.vim/pack/git-plugins/start"
+downloads="$HOME"/Downloads
+
+mkdir -p "$bin_dir" "$vim_dir"
+
+################################################################################
+# dotfiles
+################################################################################
+if [[ ! -d "$HOME"/.local/src/dotfiles ]]; then
+  mkdir -p "$HOME"/.local/src
+  git clone "$dotfiles_url" "$HOME"/.local/src/dotfiles
+fi
+
+log_info "Running dotfiles/link..."
+"$HOME"/.local/src/dotfiles/link
+
+################################################################################
+# prettyping
+################################################################################
+if [[ ! -f "$bin_dir/prettyping" ]]; then
+  install -D -v -m 755 -t "$bin_dir" "$(dl $pp_url)"
+fi
+
+################################################################################
+# exa
+################################################################################
+if [[ ! -f "$bin_dir/exa" ]]; then
+  unzip -qu "$(dl $exa_url)" -d "$downloads"
+  mv -fv "$downloads/exa-linux-x86_64" "$downloads/exa"
+  install -D -v -m 755 -t "$bin_dir" "$downloads/exa"
+fi
+
+################################################################################
+# fnm
+################################################################################
+if [[ ! -f "$bin_dir/fnm" ]]; then
+  unzip -qu "$(dl $fnm_url)" -d "$downloads"
+  install -D -v -m 755 -t "$bin_dir" "$downloads/fnm"
+fi
+
+################################################################################
+# glow
+################################################################################
+if [[ ! -f "$bin_dir"/glow ]]; then
+  tar xmzf "$(dl $glow_url)" -C "$downloads" glow
+  install -D -v -m 755 -t "$bin_dir" "$downloads/glow"
+fi
+
+################################################################################
+# yq 
+################################################################################
+if [[ ! -f "$bin_dir"/yq ]]; then
+  tar xmzf "$(dl $yq_url)" -C "$downloads" ./yq_linux_amd64
+  mv -fv "$downloads/yq_linux_amd64" "$downloads/yq"
+  install -D -v -m 755 -t "$bin_dir" "$downloads/yq"
+fi
+
+################################################################################
+# youtube-dl
+################################################################################
+if [[ ! -f "$bin_dir"/youtube-dl ]]; then
+  install -D -v -m 755 -t "$bin_dir" "$(dl $yt_url)"
+fi
+
+################################################################################
+# vim plugins
+################################################################################
+for url in $ale_url; do
+  if [[ ! -d "$vim_dir"/$(basename "$url" .git) ]]; then
+    git clone --depth 1 "$url" "$vim_dir/$(basename "$url" .git)"
+  fi
+done
+
+################################################################################
+# nord themes
+################################################################################
+names=(
+  'nord-dircolors'
+  'nord-tmux'
+  'nord-vim'
+)
+
+for name in "${names[@]}"; do
+  dest_dir="$HOME/.local/src/$name"
+  if [[ ! -d "$dest_dir" ]]; then
+    git clone --depth 1 "https://github.com/arcticicestudio/$name" "$dest_dir"
+  else
+    (cd "$dest_dir" && git pull)
+  fi
+  case "${name}" in
+    nord-dircolors)
+      symlink "$dest_dir/src/dir_colors" "$HOME/.dir_colors"
+      ;;
+    nord-tmux)
+      mkdir -p "$HOME"/.tmux
+      symlink "$dest_dir"/nord.tmux "$HOME"/.tmux/nord.tmux
+      ;;
+    nord-vim)
+      mkdir -p "$HOME"/.vim/colors
+      symlink "$dest_dir"/colors/nord.vim "$HOME"/.vim/colors/nord.vim
+      ;;
+    *)
+      log_err "Unexpected case '${name}'"
+      ;;
+  esac
+done
+
+################################################################################
+# zsh plugins
+################################################################################
+plugins=(
+  "zsh-users/zsh-syntax-highlighting"
+  "zsh-users/zsh-autosuggestions"
+  "zsh-users/zsh-history-substring-search"
+  "zsh-users/zsh-completions"
+)
+
+for plugin in "${plugins[@]}"; do
+  dest_dir="$HOME/.local/src/$plugin"
+  if [[ ! -d "$dest_dir" ]]; then 
+    git clone --depth 1 "https://github.com/$plugin" "$dest_dir"
+  else
+    (cd "$dest_dir" && git pull)
+  fi
+done

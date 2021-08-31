@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+################################################################################
+# On WSL2, share Downloads, Documents, Music and Pictures with the Windows host.
+################################################################################
+if $IS_WSL; then
+  win_drive="$(basename "$(grep drvfs /proc/self/mounts | head -n 1 | cut -d' ' -f 2)")"
+  win_user="$(get_win_user "$win_drive")"
+  win_home="/mnt/$win_drive/Users/$win_user"
+
+  for d in Downloads Documents Music Pictures Videos; do
+    src="$win_home/$d"
+    dest="$HOME/$d"
+
+    # if directory exists and it's not a symlink, then back it up
+    if [[ -d "$dest" && ! -h "$dest" ]]; then
+      backup="$dest.$(date '+%s')"
+      log_warn "Cowardly refusing to overwrite, moving \"$dest\" -> \"$backup\""
+      mv -f "$dest" "$backup"
+    fi
+
+    # create symlink
+    if [[ -d "$src" && ! -h "$dest" ]]; then
+      ln -vsf "$src" "$dest"
+    fi
+  done
+fi

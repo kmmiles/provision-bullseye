@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+if ! chkpath podman; then
+  sudo apt install -y podman
+fi
+
+# link config files
+mkdir -p "$HOME"/.config/containers
+symlink "${__ROOT}/etc/containers/registries.conf" "$HOME"/.config/containers/registries.conf
+symlink "${__ROOT}/etc/containers/containers.conf" "$HOME"/.config/containers/containers.conf
+symlink "${__ROOT}/etc/containers/storage.conf" "$HOME"/.config/containers/storage.conf
+symlink "${__ROOT}/etc/containers/policy.json" "$HOME"/.config/containers/policy.json
+
+# Add docker alias command
+if ! chkpath docker; then
+  mkdir -p "$HOME/.local/bin"
+  cat << EOF > "$HOME/.local/bin/docker"
+#!/bin/sh
+exec /usr/bin/podman "\$@"
+EOF
+  chmod +x "$HOME/.local/bin/docker"
+fi

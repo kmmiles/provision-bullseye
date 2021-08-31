@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+url="https://github.com/Snaipe/Criterion/releases/download/v2.3.3/criterion-v2.3.3-linux-x86_64.tar.bz2"
+dest="/usr"
+
+log_msg "Installing criterion library..."
+sudo tar xvfj "$(dl "$url")" --strip-components=1 -C "$dest"
+#ppa_add "ppa:snaipewastaken/ppa"
+#sudo apt -y install criterion-dev
+
+#$ sudo add-apt-repository ppa:snaipewastaken/ppa
+#$ sudo apt-get update
+#$ sudo apt-get install criterion-dev

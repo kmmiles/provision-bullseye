@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+if ! chkpkg packages-microsoft-prod; then
+  log_msg "Installing microsoft repo"
+  url=https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
+  sudo dpkg -i "$(dl "$url")" 
+fi
+
+if ! chkpkg dotnet-sdk-5.0; then
+  log_msg "Installing dotnet sdk"
+  sudo apt-get update
+  sudo apt -y install \
+    dotnet-sdk-5.0
+fi

@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+log_msg "Installing core dev tools..."
+sudo apt --no-install-recommends -y install \
+  build-essential \
+  manpages-dev \
+  pkg-config \
+  gdb \
+  valgrind \
+  bison \
+  flex \
+  clang \
+  clang-tidy \
+  clang-format \
+  bear \
+  cmake \
+  cmake-doc \
+  python-is-python3 \
+  shellcheck \
+  jq \
+  astyle \
+  autopoint \
+  gperf \
+  libssl-dev \
+  libelf-dev \
+  libncurses-dev \
+  texinfo \
+  aspell \
+  texlive-latex-base \
+  texlive-latex-extra \
+  texlive-fonts-recommended \
+  groff

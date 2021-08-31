@@ -1,0 +1,31 @@
+#!/bin/bash
+################################################################################
+# Configures apt to cache downloads in the Windows `Downloads` directory.
+# This prevents re-downloading the same packages across WSL2 distributions.
+################################################################################
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+if $IS_WSL; then
+  apt_conf_dir="/etc/apt/apt.conf.d"
+  cache_dir="$HOME/Downloads/apt"
+
+  mkdir -p "$cache_dir"
+
+  if [[ ! -f $apt_conf_dir/01cache-dir ]]; then
+    echo "dir::cache::archives $cache_dir;" | \
+      sudo tee "$apt_conf_dir"/01cache-dir > /dev/null 2>&1
+  fi
+
+  if [[ ! -f /etc/apt/apt.conf.d/01keep-debs ]]; then
+    echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | \
+      sudo tee "$apt_conf_dir"/01keep-debs > /dev/null 2>&1
+  fi
+fi
+
+sudo apt update
+sudo apt -y upgrade
+sudo apt -y autoremove
+
+
