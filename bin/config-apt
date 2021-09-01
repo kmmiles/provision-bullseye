@@ -22,6 +22,8 @@ if $IS_WSL; then
     echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | \
       sudo tee "$apt_conf_dir"/01keep-debs > /dev/null 2>&1
   fi
+else
+  mkdir -p "$HOME"/Downloads
 fi
 
 sudo apt update
