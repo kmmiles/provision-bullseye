@@ -14,6 +14,7 @@ ale_url="https://github.com/dense-analysis/ale.git"
 yt_url="https://yt-dl.org/downloads/latest/youtube-dl"
 yq_url="https://github.com/mikefarah/yq/releases/download/v4.6.1/yq_linux_amd64.tar.gz"
 fnm_url="https://github.com/Schniz/fnm/releases/download/v1.23.0/fnm-linux.zip"
+yank_url="https://github.com/equalsraf/win32yank/releases/download/v0.0.4/win32yank-x64.zip"
 
 local_dir="$HOME/.local"
 lib_dir="$local_dir/lib"
@@ -92,6 +93,15 @@ for url in $ale_url; do
 done
 
 ################################################################################
+# win32yank.exe (for wsl2 only)
+# allows nvim to copy stuff to the windows clipboard
+################################################################################
+if $IS_WSL && [[ ! -f "$bin_dir/win32yank.exe" ]]; then
+  unzip -qu "$(dl $yank_url)" -d "$downloads"
+  install -D -v -m 755 -t "$bin_dir" "$downloads/win32yank.exe"
+fi
+
+################################################################################
 # nord themes
 ################################################################################
 names=(
@@ -104,8 +114,6 @@ for name in "${names[@]}"; do
   dest_dir="$HOME/.local/src/$name"
   if [[ ! -d "$dest_dir" ]]; then
     git clone --depth 1 "https://github.com/arcticicestudio/$name" "$dest_dir"
-  else
-    (cd "$dest_dir" && git pull)
   fi
   case "${name}" in
     nord-dircolors)
@@ -139,7 +147,5 @@ for plugin in "${plugins[@]}"; do
   dest_dir="$HOME/.local/src/$plugin"
   if [[ ! -d "$dest_dir" ]]; then 
     git clone --depth 1 "https://github.com/$plugin" "$dest_dir"
-  else
-    (cd "$dest_dir" && git pull)
   fi
 done

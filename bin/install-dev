@@ -19,6 +19,7 @@ sudo apt --no-install-recommends -y install \
   cmake \
   cmake-doc \
   python-is-python3 \
+  strace \
   shellcheck \
   jq \
   astyle \
