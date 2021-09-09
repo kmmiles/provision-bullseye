@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+for script in "$__ROOT"/tools/*; do
+  symlink "$script" "$HOME/.local/bin/$(basename "$script")"
+done
+
+

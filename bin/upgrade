@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+sudo apt update
+sudo apt -y upgrade
+sudo apt -y autoremove

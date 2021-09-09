@@ -1,0 +1,112 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+config_home() {
+  home_dirs=(
+    'Downloads'
+    'Documents'
+    'Music'
+    'Pictures'
+    'Videos'
+  )
+
+  # On WSL2, share Downloads, Documents, Music and Pictures with the Windows host.
+  if $IS_WSL; then
+    win_drive="$(basename "$(grep drvfs /proc/self/mounts | head -n 1 | cut -d' ' -f 2)")"
+    win_user="$(get_win_user "$win_drive")"
+    win_home="/mnt/$win_drive/Users/$win_user"
+
+    for d in "${home_dirs[@]}"; do
+      src="$win_home/$d"
+      dest="$HOME/$d"
+
+      # if directory exists and it's not a symlink, then back it up
+      if [[ -d "$dest" && ! -h "$dest" ]]; then
+        backup="$dest.$(date '+%s')"
+        log_warn "Cowardly refusing to overwrite, moving \"$dest\" -> \"$backup\""
+        mv -f "$dest" "$backup"
+      fi
+
+      # create symlink
+      if [[ -d "$src" && ! -h "$dest" ]]; then
+        ln -vsf "$src" "$dest"
+      fi
+    done
+  else
+    # otherwise just create the dirs
+    for d in "${home_dirs[@]}"; do
+      mkdir -p "$HOME/$d"
+    done
+  fi
+}
+
+config_sudo() {
+  sudoers_group="sudo"
+  sudoers_file="/etc/sudoers.d/passwordless"
+  user="$(id -un)"
+
+  # add sudo group
+  if ! getent group "$sudoers_group" > /dev/null 2>&1; then
+    log_msg "Adding new group: \"$sudoers_group\""
+    sudo groupadd "$sudoers_group"
+  fi
+
+  # add sudoers config file
+  if [[ ! -f "$sudoers_file" ]]; then
+    log_msg "Creating new file: \"$sudoers_file\""
+    echo '%sudo ALL=(ALL) NOPASSWD:ALL' | sudo tee "$sudoers_file" > /dev/null
+  fi
+
+  # add user to sudoers group
+  if ! groups "$user" | grep -q "$sudoers_group"; then
+    log_msg "Adding user \"$user\" to group \"$sudoers_group\""
+    sudo /usr/sbin/usermod -a -G "$sudoers_group" "$user"
+  fi
+
+  # lock root password
+  password_state=$(sudo passwd -S root | cut -d' ' -f 2)
+  if [[ "$password_state" != "L" ]]; then
+    log_msg "Locking root password"
+    sudo passwd -l root
+  fi
+}
+
+config_apt() {
+  if $IS_WSL; then
+    apt_conf_dir="/etc/apt/apt.conf.d"
+    cache_dir="$HOME/Downloads/apt"
+
+    mkdir -p "$cache_dir"
+
+    if [[ ! -f $apt_conf_dir/01cache-dir ]]; then
+      echo "dir::cache::archives $cache_dir;" | \
+        sudo tee "$apt_conf_dir"/01cache-dir > /dev/null 2>&1
+    fi
+
+    if [[ ! -f /etc/apt/apt.conf.d/01keep-debs ]]; then
+      echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | \
+        sudo tee "$apt_conf_dir"/01keep-debs > /dev/null 2>&1
+    fi
+  fi
+
+}
+
+config_ssh() {
+  cfg="/etc/ssh/ssh_config.d/disable-bad"
+  if [[ ! -f  "$cfg" ]]; then
+    log_msg "Creating \"$cfg\""
+    sudo cp -v "${__ROOT}/etc/ssh/ssh_config.d/disable-bad" "$cfg"
+  fi
+}
+
+main() {
+  set -e; \
+    config_home && \
+    config_sudo && \
+    config_apt && \
+    config_ssh
+}
+
+main "$@"

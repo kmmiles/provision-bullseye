@@ -1,14 +1,14 @@
 #!/bin/bash
 
 scripts=(
-  'config-home'
-  'config-sudo'
-  'config-apt'
+  'config'
+  'upgrade'
   'install-base'
   'install-home'
   'install-dev'
   'install-kvm'
   'install-podman'
+  'link-tools'
 )
 
 rootdir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
