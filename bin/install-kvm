@@ -10,3 +10,31 @@ if ! chkpath qemu-system-x86_64 qemu-img kvm-ok; then
     qemu-kvm \
     qemu-utils
 fi
+
+# - need groups `libvirt` and `kvm` to exist.
+# - need the current user to be a member of both.
+user="$(id -un)"
+for group in libvirt kvm; do
+  if ! getent group "$group" &> /dev/null; then
+    log_msg "Adding new group: $group"
+    sudo groupadd "libvirt"
+  fi
+
+  if ! groups "$user" | grep -q "$group"; then
+    log_msg "Adding $user to $group"
+    sudo /usr/sbin/usermod -a -G "$group" "$user"
+  fi
+done
+
+# need `/dev/kvm` to be owned by group `kvm`
+curr_group=$(stat -c "%G" /dev/kvm)
+if [[ "$curr_group" != "kvm" ]]; then
+  sudo chgrp kvm /dev/kvm
+fi
+
+# need `/dev/kvm` to have r/w permission for user and group
+curr_perms=$(stat -c "%a" /dev/kvm)
+if [[ "$curr_perms" != "660" ]]; then
+  sudo chmod 660 /dev/kvm
+fi
+

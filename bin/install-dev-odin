@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+if ! chkpath odin; then
+  #url="https://github.com/odin-lang/Odin/releases/download/dev-2021-09/odin-ubuntu-amd64-dev-2021-09.zip"
+  url="https://f001.backblazeb2.com/file/odin-binaries/nightly/odin-ubuntu-amd64-nightly%2B2021-09-12.zip"
+
+  if ! chkpath llvm clang unzip; then
+    sudo apt --no-install-recommends -y install \
+      llvm \
+      clang \
+      unzip
+  fi
+
+  unzip -qu "$(dl "$url")" -d "$HOME"/Downloads
+  rm -rf "$HOME"/.local/odin
+  mv -fv "$HOME"/Downloads/ubuntu_artifacts "$HOME"/.local/odin
+  ln -sf "$HOME"/.local/odin/odin "$HOME"/.local/bin/odin
+fi

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+if ! chkpath virt-manager; then
+  sudo apt --no-install-recommends -y install \
+    virt-manager \
+    dnsmasq \
+    dbus-x11
+fi
+
+
+if $IS_WSL; then
+  # link loose security config for private WSL usage
+  sudo rm -f /etc/libvirt/libvirtd.conf
+  sudo ln -sf "${__ROOT}"/etc/libvirt/libvirtd-wsl.conf /etc/libvirt/libvirtd.conf
+fi

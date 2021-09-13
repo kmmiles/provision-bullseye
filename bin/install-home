@@ -6,23 +6,19 @@
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
 
 dotfiles_url="https://github.com/kmmiles/dotfiles"
-
 pp_url="https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping"
 exa_url="https://github.com/ogham/exa/releases/download/v0.9.0/exa-linux-x86_64-0.9.0.zip"
 glow_url="https://github.com/charmbracelet/glow/releases/download/v1.0.2/glow_1.0.2_linux_x86_64.tar.gz"
-ale_url="https://github.com/dense-analysis/ale.git"
 yt_url="https://yt-dl.org/downloads/latest/youtube-dl"
 yq_url="https://github.com/mikefarah/yq/releases/download/v4.6.1/yq_linux_amd64.tar.gz"
 fnm_url="https://github.com/Schniz/fnm/releases/download/v1.23.0/fnm-linux.zip"
 yank_url="https://github.com/equalsraf/win32yank/releases/download/v0.0.4/win32yank-x64.zip"
 
 local_dir="$HOME/.local"
-lib_dir="$local_dir/lib"
 bin_dir="$local_dir/bin"
-vim_dir="$HOME/.vim/pack/git-plugins/start"
 downloads="$HOME"/Downloads
 
-mkdir -p "$bin_dir" "$vim_dir"
+mkdir -p "$bin_dir"
 
 ################################################################################
 # dotfiles
@@ -84,15 +80,6 @@ if [[ ! -f "$bin_dir"/youtube-dl ]]; then
 fi
 
 ################################################################################
-# vim plugins
-################################################################################
-for url in $ale_url; do
-  if [[ ! -d "$vim_dir"/$(basename "$url" .git) ]]; then
-    git clone --depth 1 "$url" "$vim_dir/$(basename "$url" .git)"
-  fi
-done
-
-################################################################################
 # win32yank.exe (for wsl2 only)
 # allows nvim to copy stuff to the windows clipboard
 ################################################################################
@@ -134,18 +121,34 @@ for name in "${names[@]}"; do
 done
 
 ################################################################################
+# vim plugins
+################################################################################
+vim_plugins_dir="$HOME/.vim/pack/git-plugins/start"
+vim_plugins=(
+  "https://github.com/dense-analysis/ale.git"
+  "https://github.com/Tetralux/odin.vim"
+)
+
+mkdir -p "$vim_plugins_dir"
+for plugin_url in "${vim_plugins[@]}"; do
+  if [[ ! -d "$vim_plugins_dir"/$(basename "$plugin_url" .git) ]]; then
+    git clone --depth 1 "$plugin_url" "$vim_plugins_dir/$(basename "$plugin_url" .git)"
+  fi
+done
+
+################################################################################
 # zsh plugins
 ################################################################################
-plugins=(
+zsh_plugins=(
   "zsh-users/zsh-syntax-highlighting"
   "zsh-users/zsh-autosuggestions"
   "zsh-users/zsh-history-substring-search"
   "zsh-users/zsh-completions"
 )
 
-for plugin in "${plugins[@]}"; do
+for plugin in "${zsh_plugins[@]}"; do
   dest_dir="$HOME/.local/src/$plugin"
   if [[ ! -d "$dest_dir" ]]; then 
-    git clone --depth 1 "https://github.com/$plugin" "$dest_dir"
+    git clone --depth 1 "htTps://github.com/$plugin" "$dest_dir"
   fi
 done
