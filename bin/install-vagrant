@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+if ! chkpath vagrant; then
+  log_msg "Installing vagrant"
+  sudo apt install -y \
+    vagrant
+fi
+
+plugin="vagrant-libvirt"
+if ! vagrant plugin list | grep -q "$plugin"; then
+  sudo apt install -y \
+    qemu \
+    ebtables \
+    dnsmasq-base \
+    qemu-kvm \
+    libvirt-clients \
+    libvirt-daemon-system \
+    bridge-utils \
+    virt-manager \
+    python3-pip \
+    libxslt-dev \
+    libxml2-dev \
+    libvirt-dev \
+    zlib1g-dev \
+    ruby-dev
+  
+  vagrant plugin install "$plugin"
+fi

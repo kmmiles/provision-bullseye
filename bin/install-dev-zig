@@ -1,0 +1,8 @@
+#!/bin/bash
+# shellcheck source=/dev/null
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"/lib.sh
+
+url=https://ziglang.org/builds/zig-linux-x86_64-0.9.0-dev.1712+9836f1b2f.tar.xz
+if ! chkpath zig; then
+  tar xf "$(dl $url)" -C "$HOME"/.local
+fi

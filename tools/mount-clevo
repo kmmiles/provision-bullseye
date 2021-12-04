@@ -33,7 +33,7 @@ if $is_mounted && $umount; then
   sudo umount "$mount_point"
   printf "Unmounted %s\n" "$mount_point"
 elif ! $is_mounted && ! $umount; then
-  set -e; \
+  set -ex; \
     sudo mkdir -p "$mount_point" && \
     sudo chown "$(id -nu):$(id -ng)" "$mount_point" && \
     sudo mount.smb3 \

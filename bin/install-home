@@ -149,6 +149,6 @@ zsh_plugins=(
 for plugin in "${zsh_plugins[@]}"; do
   dest_dir="$HOME/.local/src/$plugin"
   if [[ ! -d "$dest_dir" ]]; then 
-    git clone --depth 1 "htTps://github.com/$plugin" "$dest_dir"
+    git clone --depth 1 "https://github.com/$plugin" "$dest_dir"
   fi
 done

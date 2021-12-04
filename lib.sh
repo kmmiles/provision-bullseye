@@ -138,7 +138,7 @@ log_err() {
   if [[ "$__LOGFILE" != "" ]]; then
     puts "$(log_get_title)${1}" >> "$__LOGFILE"
   else
-    >&2 putsr "$(log_get_title)${1}"
+    >&2 puts-red "$(log_get_title)${1}"
   fi
 }
 
@@ -153,7 +153,7 @@ log_warn() {
   if [[ "$__LOGFILE" != "" ]]; then
     puts "$(log_get_title)${1}" >> "$__LOGFILE"
   else
-    >&2 putsy "$(log_get_title)${1}"
+    >&2 puts-yellow "$(log_get_title)${1}"
   fi
 }
 
@@ -168,7 +168,7 @@ log_info() {
   if [[ "$__LOGFILE" != "" ]]; then
     puts "$(log_get_title)${1}" >> "$__LOGFILE"
   else
-    >&2 putsb "$(log_get_title)${1}"
+    >&2 puts-blue "$(log_get_title)${1}"
   fi
 }
 
@@ -269,10 +269,10 @@ ppa_add() {
 #   The message
 ################################################################################
 puts()  { printf "%s\n" "${1}" ; }
-putsr() { printf "%s\n" "${TEXT_BOLD}${TEXT_RED}${1}${TEXT_NORMAL}" ; }
-putsg() { printf "%s\n" "${TEXT_BOLD}${TEXT_GREEN}${1}${TEXT_NORMAL}" ; }
-putsb() { printf "%s\n" "${TEXT_BOLD}${TEXT_BLUE}${1}${TEXT_NORMAL}" ; }
-putsy() { printf "%s\n" "${TEXT_BOLD}${TEXT_YELLOW}${1}${TEXT_NORMAL}" ; }
+puts-red() { printf "%s\n" "${TEXT_BOLD}${TEXT_RED}${1}${TEXT_NORMAL}" ; }
+puts-green() { printf "%s\n" "${TEXT_BOLD}${TEXT_GREEN}${1}${TEXT_NORMAL}" ; }
+puts-blue() { printf "%s\n" "${TEXT_BOLD}${TEXT_BLUE}${1}${TEXT_NORMAL}" ; }
+puts-yellow() { printf "%s\n" "${TEXT_BOLD}${TEXT_YELLOW}${1}${TEXT_NORMAL}" ; }
 # slackware style OK/FAIL status logs
 
 __STATUS_MSG=
@@ -318,7 +318,7 @@ status_fail() {
   printf "%${len}s\\n" "[${TEXT_BOLD}${TEXT_RED}FAIL${TEXT_NORMAL}]"
 
   if [[ -n "$__LOGFILE" ]]; then
-    2>&1 putsr "Check logfile for details: $(relpath "$__LOGFILE")"
+    2>&1 puts-red "Check logfile for details: $(relpath "$__LOGFILE")"
   fi
 }
 
@@ -401,11 +401,13 @@ get_win_user() {
   invalid_users=( Administrator Default DefaultAccount Guest Public WDAGUtilityAccount )
   find "/mnt/$win_drive/Users" -mindepth 1 -maxdepth 1 -type d |
     while read -r line; do
+      # skip invalid users
       user="$(basename "$line")"
       if [[ ${invalid_users[*]} =~ ${user} ]]; then
         continue
       fi
     
+      # print valid user and done
       echo "$user"
       break
     done

@@ -12,8 +12,9 @@ config_home() {
     'Videos'
   )
 
-  # On WSL2, share Downloads, Documents, Music and Pictures with the Windows host.
+  # For WSL2...
   if $IS_WSL; then
+    # share Downloads, Documents, Music and Pictures with the Windows host.
     win_drive="$(basename "$(grep drvfs /proc/self/mounts | head -n 1 | cut -d' ' -f 2)")"
     win_user="$(get_win_user "$win_drive")"
     win_home="/mnt/$win_drive/Users/$win_user"
@@ -22,18 +23,26 @@ config_home() {
       src="$win_home/$d"
       dest="$HOME/$d"
 
-      # if directory exists and it's not a symlink, then back it up
+      ## if directory exists and it's not a symlink, then back it up
       if [[ -d "$dest" && ! -h "$dest" ]]; then
         backup="$dest.$(date '+%s')"
         log_warn "Cowardly refusing to overwrite, moving \"$dest\" -> \"$backup\""
         mv -f "$dest" "$backup"
       fi
 
-      # create symlink
+      ## create symlink
       if [[ -d "$src" && ! -h "$dest" ]]; then
         ln -vsf "$src" "$dest"
       fi
     done
+
+    # if alacritty is installed on the windows side, make a dumb
+    # symlink to it's config file in $HOME
+    #set -x
+    log_msg "linking windows alacritty config to $HOME..."
+    win_alacritty_config="$win_home"/AppData/Local/alacritty/alacritty.cfg
+    mkdir -p "$(dirname "$win_alacritty_config")"
+    ln -vsf "$win_alacritty_config" "$HOME"/alacritty-windows.cfg
   else
     # otherwise just create the dirs
     for d in "${home_dirs[@]}"; do

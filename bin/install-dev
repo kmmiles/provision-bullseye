@@ -33,4 +33,7 @@ sudo apt --no-install-recommends -y install \
   texlive-latex-base \
   texlive-latex-extra \
   texlive-fonts-recommended \
-  groff
+  groff \
+  sqlite3 \
+  sqlite3-doc \
+  ruby-dev
