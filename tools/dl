@@ -1,37 +1,49 @@
 #!/bin/bash
 
-TEXT_BOLD=$(tput bold)
-TEXT_BLUE=$(tput setaf 4)
-TEXT_NORMAL=$(tput sgr0)
+set -euo pipefail
 
-puts()  { printf "%s\n" "${1}" ; }
-puts-blue() { printf "%s\n" "${TEXT_BOLD}${TEXT_BLUE}${1}${TEXT_NORMAL}" ; }
-log-info() { >&2 puts-blue "$(basename "$0") ${1}" ; }
-log-err() { >&2 puts-red "$(log_get_title)${1}" ; }
+default_path=$HOME/Downloads
 
-url="$1"
-if [[ -z "$url" ]]; then
-  puts "Usage: $(basename "$0") <url>"
-  exit 1
-fi
+usage() {
+  cat <<EOF
+Usage: $0 <URL>
 
-filename=$(basename "$url")
-filepath="$HOME"/Downloads/"$filename"
+Downloads <URL> to $default_path
+EOF
+}
 
-# destination directory must exist
-if [[ ! -d "$HOME"/Downloads ]]; then
-  log-err "Directory does not exist \"$HOME/Downloads\"."
-  exit 1 
-fi
+err()   { 2>&1 printf "%s%s%s\n" "$(tput setaf 1)" "$@" "$(tput sgr0)"; }
+warn()  { 2>&1 printf "%s%s%s\n" "$(tput setaf 3)" "$@" "$(tput sgr0)"; }
+info()  { 2>&1 printf "%s%s%s\n" "$(tput setaf 4)" "$@" "$(tput sgr0)"; }
+onerr() { local s=$?; err "$0:${BASH_LINENO[0]} $BASH_COMMAND"; exit $s; }
 
-# download file
-if [[ ! -f "$filepath" ]]; then
-  log-info "Downloading \"$url\" to \"$HOME/Downloads\"..."
-  if ! curl -sfL -o "$filepath" "$url"; then
-    log-err "Failed to download \"$url\"."
+main() {
+  trap onerr ERR
+  path="$default_path"
+
+  while getopts 'h' flag; do
+    case "${flag}" in
+      *) usage ; exit 1 ;; 
+    esac
+  done
+
+  url="${1:-}"
+  if [[ -z "$url" ]]; then
+    usage
     exit 1
   fi
-fi
 
-# print path of downloaded file
-puts "$filepath"
+  filename=$(basename "$url")
+  filepath=$path/$filename
+
+  if [[ ! -f "$filepath" ]]; then
+    info "Downloading \"$url\" to \"$filepath\"..."
+    mkdir -p "$path"
+    curl -sfL -o "$filepath" "$url"
+  fi
+
+  # print path of downloaded file
+  printf "%s\n" "$filepath"
+}
+
+main "$@"
